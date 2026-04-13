@@ -7,5 +7,8 @@
     </content>
     <orderEntry type="jdk" jdkName="openjdk-25" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="randomhash-1.0.0 (3)" level="project" />
+    <orderEntry type="library" name="randomhash-1.0.0 (5)" level="project" />
+    <orderEntry type="library" name="guava-33.5.0-jre" level="project" />
   </component>
 </module>
