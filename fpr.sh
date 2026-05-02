@@ -3,6 +3,9 @@
 GT_6945="$PWD/data/GCA_000006945.2/truth-GCA_000006945.txt"
 GT_9045="$PWD/data/GCA_000009045.1/truth-GCA_000009045.txt"
 
+GT_DATA1="$PWD/xor-filter/data_1/truth.txt"
+GT_DATA2="$PWD/xor-filter/data_2/truth.txt"
+
 if [ ! -f "$GT_6945" ]; then
     echo "Error: Ground truth file for 6945 '$GT_6945' not found."
     exit 1
@@ -13,18 +16,34 @@ if [ ! -f "$GT_9045" ]; then
     exit 1
 fi
 
-cd "$PWD/xor-filter"
+if [ ! -f "$GT_DATA1" ]; then
+    echo "Error: Ground truth file for data1 '$GT_DATA1' not found."
+    exit 1
+fi
+
+if [ ! -f "$GT_DATA2" ]; then
+    echo "Error: Ground truth file for data2 '$GT_DATA2' not found."
+    exit 1
+fi
+
+cd "$PWD/xor-filter" || exit
 
 RES_FILE="xor-fpr.txt"
+> "$RES_FILE"
 
 echo "Processing files..."
 
-for file in res-GCA_*.txt; do
+for file in res-*.txt; do
     [ -e "$file" ] || continue
 
     if [[ "$file" =~ res-GCA_([0-9]+)-([0-9\.]+)(-[0-9]+)?\.txt ]]; then
         dataset="${BASH_REMATCH[1]}"
         target_fpr="${BASH_REMATCH[2]}"
+
+    elif [[ "$file" =~ res-(data[12])-([0-9\.]+)(-[0-9]+)?\.txt ]]; then
+        dataset="${BASH_REMATCH[1]}"
+        target_fpr="${BASH_REMATCH[2]}"
+
     else
         continue
     fi
@@ -33,6 +52,10 @@ for file in res-GCA_*.txt; do
         CURRENT_GT="$GT_6945"
     elif [ "$dataset" == "000009045" ]; then
         CURRENT_GT="$GT_9045"
+    elif [ "$dataset" == "data1" ]; then
+        CURRENT_GT="$GT_DATA1"
+    elif [ "$dataset" == "data2" ]; then
+        CURRENT_GT="$GT_DATA2"
     else
         echo "Warning: Unknown dataset '$dataset' in file '$file'. Skipping."
         continue
@@ -55,10 +78,17 @@ for file in res-GCA_*.txt; do
     echo "$dataset $target_fpr $actual_fpr" >> "$RES_FILE"
 done
 
-echo ""
-printf "%-12s | %-12s | %-10s | %-15s\n" "Dataset" "Target FPR" "# of Runs" "Avg Actual FPR"
-echo "-------------+--------------+------------+-----------------"
+# Define the final summary output file
+SUMMARY_FILE="xor-fpr-summary.txt"
 
+echo "Calculations complete. Writing formatted results to $SUMMARY_FILE..."
+
+# Write the header to the summary file
+echo "" > "$SUMMARY_FILE"
+printf "%-12s | %-12s | %-10s | %-15s\n" "Dataset" "Target FPR" "# of Runs" "Avg Actual FPR" >> "$SUMMARY_FILE"
+echo "-------------+--------------+------------+-----------------" >> "$SUMMARY_FILE"
+
+# Append the sorted awk output to the summary file
 awk '
 {
     dataset = $1
@@ -76,4 +106,4 @@ END {
         avg = sum[k] / count[k]
         printf "%-12s | %-12s | %-10s | %.6f\n", d[k], t[k], count[k], avg
     }
-}' "$RES_FILE" | sort -k1,1 -k2,2n
+}' "$RES_FILE" | sort -k1,1 -k2,2n >> "$SUMMARY_FILE"
