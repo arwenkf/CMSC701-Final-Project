@@ -1,3 +1,5 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -10,12 +12,13 @@ import com.google.common.hash.*;
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Runner {
     public static void main(String[] args) throws IOException {
+        String inputPath = args[0], fpr = args[1], queryPath = args[2], outputPath = args[3];
 
-        HashSet<String> set = readFile("Bloom-Filter/test-inputs/dummy-input.txt");
+        long startBuild = System.nanoTime();
+        HashSet<String> set = readFile(inputPath);
 //        HashSet<String> set = readFile("Bloom-Filter/test-inputs/debugging.txt");
-        BloomFilter bloomFilter = new BloomFilter(set.size(), 0.05);
+        BloomFilter bloomFilter = new BloomFilter(set.size(), Double.parseDouble(fpr));
 
-//
         System.out.printf("n %d\n", set.size());
 //        System.out.printf("m %d\n", bloomFilter.m);
 //        System.out.printf("k %d", bloomFilter.k);
@@ -24,8 +27,24 @@ public class Runner {
         set.forEach(x -> {
             bloomFilter.add(x);
         });
-        queryFile("Bloom-Filter/test-inputs/dummy-query.txt", bloomFilter);
 
+        long endBuild = System.nanoTime();
+        long startQuery = System.nanoTime();
+
+        queryFile(queryPath, bloomFilter, outputPath);
+        long endQuery = System.nanoTime();
+
+        double buildTimeSec = (endBuild - startBuild) / 1_000_000_000.0;
+        double queryTimeSec = (endQuery - startQuery) / 1_000_000_000.0;
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("bloom-eval.txt", true))) {
+            writer.write( "fpr:" + fpr);
+            writer.newLine();
+            writer.write( buildTimeSec + "\t" + queryTimeSec);
+            writer.newLine();
+        } catch (IOException e) {
+            System.err.println("Error writing to bloom-eval.txt: " + e.getMessage());
+        }
 
 
         //baby sanity test
@@ -72,19 +91,28 @@ public class Runner {
         return set;
     }
 
-    public static void queryFile(String file, BloomFilter bloomFilter) throws IOException {
+    public static void queryFile(String file, BloomFilter bloomFilter, String out) throws IOException {
         try (
                 Stream<String> stream = Files.lines(Paths.get(file))
         )
         {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(out));
+
             stream.forEach(key -> {
-                if (bloomFilter.check(key)) {
-                    System.out.printf("%s\t PROB_YES\n", key);
-                } else {
-                    System.out.printf("%s\t NO\n", key);
+                try {
+                    if (bloomFilter.check(key)) {
+                        writer.write(key + "\t" + "PROB_YES" + "\n");
+                    } else {
+                        writer.write(key + "\t" + "NO" + "\n");
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             });
+
+            writer.close();
         }
+
     }
 
     public static void queryFile(String file, CuckooFilter cuckooFilter) throws IOException {
