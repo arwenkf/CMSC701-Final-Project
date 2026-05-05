@@ -3,8 +3,8 @@
 GT_6945="$PWD/data/GCA_000006945.2/truth-GCA_000006945.txt"
 GT_9045="$PWD/data/GCA_000009045.1/truth-GCA_000009045.txt"
 
-GT_DATA1="$PWD/xor-filter/data_1/truth.txt"
-GT_DATA2="$PWD/xor-filter/data_2/truth.txt"
+GT_DATA1="$PWD/data/data_1/truth.txt"
+GT_DATA2="$PWD/data/data_2/truth.txt"
 
 if [ ! -f "$GT_6945" ]; then
     echo "Error: Ground truth file for 6945 '$GT_6945' not found."
@@ -78,17 +78,14 @@ for file in res-*.txt; do
     echo "$dataset $target_fpr $actual_fpr" >> "$RES_FILE"
 done
 
-# Define the final summary output file
-SUMMARY_FILE="xor-fpr-summary.txt"
 
-echo "Calculations complete. Writing formatted results to $SUMMARY_FILE..."
+SUMMARY_FILE="xor-fpr-opt-res.txt"
 
-# Write the header to the summary file
 echo "" > "$SUMMARY_FILE"
 printf "%-12s | %-12s | %-10s | %-15s\n" "Dataset" "Target FPR" "# of Runs" "Avg Actual FPR" >> "$SUMMARY_FILE"
 echo "-------------+--------------+------------+-----------------" >> "$SUMMARY_FILE"
 
-# Append the sorted awk output to the summary file
+
 awk '
 {
     dataset = $1
