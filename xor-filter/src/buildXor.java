@@ -193,8 +193,9 @@ public class buildXor {
             writeOut(out);
 
             try (BufferedWriter buildWriter = new BufferedWriter(new FileWriter("xor-eval-build.txt", true))) {
-                String res = "built time with fpr: " + fpr.trim();
-                buildWriter.write(res);
+                buildWriter.write(path);
+                buildWriter.newLine();
+                buildWriter.write("fpr " + fpr.trim());
                 buildWriter.newLine();
                 buildWriter.write(String.valueOf((endBuild - startBuild) / 1_000_000_000.0));
                 buildWriter.newLine();

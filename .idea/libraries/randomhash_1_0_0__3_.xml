@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="randomhash-1.0.0 (3)">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/Bloom-Filter/lib/randomhash-1.0.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="jar://$PROJECT_DIR$/Bloom-Filter/lib/randomhash-1.0.0.jar!/" recursive="false" />
+  </library>
+</component>

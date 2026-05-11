@@ -16,22 +16,7 @@ printf "6945\n" >> "$RES_FILE"
 for f in "${FPR_VALUES[@]}"; do
     for ((i=1; i<=NUM_RUNS; i++)); do
         echo "Run $i/$NUM_RUNS: Building 6945 with FPR $f"
-        java -cp "lib/*:src" Runner ../data/GCA_000006945.2/21-mers-GCA_000006945.2.txt "$f" ../data/GCA_000006945.2/query-GCA_000006945.txt "res-GCA_000006945-$f-$i.txt"
-    done
-done
-printf "9045\n" >> "$RES_FILE"
-for f in "${FPR_VALUES[@]}"; do
-    for ((i=1; i<=NUM_RUNS; i++)); do
-        echo "Run $i/$NUM_RUNS: Building 9045 with FPR $f"
-        java -cp "lib/*:src" Runner ../data/GCA_000009045.1/21-mers-GCA_000009045.1.txt "$f" ../data/GCA_000009045.1/query-GCA_000009045.txt "res-GCA_000009045-$f-$i.txt"
-    done
-done
-
-printf "data1\n" >> "$RES_FILE"
-for f in "${FPR_VALUES[@]}"; do
-    for ((i=1; i<=NUM_RUNS; i++)); do
-        echo "Run $i/$NUM_RUNS: Building data 1 with FPR $f"
-        java -cp "lib/*:src" Runner ../data/data_1/input.txt "$f" ../data/data_1/query.txt "res-data1-$f-$i.txt"
+        java -cp "lib/*:src" Runner ../data/GCA_000006945.2/21-mers-GCA_000006945.2.txt "$f" ../data/GCA_000006945.2/GCA_000006945-true-positives.txt "res-GCA_000006945-$f-$i.txt"
     done
 done
 
@@ -39,7 +24,7 @@ printf "data2\n" >> "$RES_FILE"
 for f in "${FPR_VALUES[@]}"; do
     for ((i=1; i<=NUM_RUNS; i++)); do
         echo "Run $i/$NUM_RUNS: Building data 2 with FPR $f"
-        java -cp "lib/*:src" Runner ../data/data_2/input.txt "$f" ../data/data_2/query.txt "res-data2-$f-$i.txt"
+        java -cp "lib/*:src" Runner ../data/data_2/input.txt "$f" ../data/data_2/data2-true-positives.txt "res-data2-$f-$i.txt"
     done
 done
 
@@ -94,7 +79,7 @@ END {
         print ""
     }
 }
-' "$FILE" > "bloom-res.txt"
+' "$FILE" > "bloom-res-true-positives.txt"
 
 rm $FILE
 
