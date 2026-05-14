@@ -12,6 +12,8 @@ import com.google.common.hash.*;
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Runner {
     public static void main(String[] args) throws IOException {
+        // actual use stuff
+
         String inputPath = args[0], fpr = args[1], queryPath = args[2], outputPath = args[3];
 
         long startBuild = System.nanoTime();
@@ -47,37 +49,23 @@ public class Runner {
         }
 
 
-        //baby sanity test
+        // arwen debugging
 
-//        CuckooFilter cuckooFilter = new CuckooFilter(set.size(), .05, .95, 4, 500);
+//        HashSet<String> set = readFile("Bloom-Filter/test-inputs/dummy-input.txt");
 
+//        BloomFilter bloomFilter = new BloomFilter(set.size(), .05);
+//        set.stream().sorted().forEach(x -> {
+//            bloomFilter.add(x);
+//        });
+//        queryFile("Bloom-Filter/test-inputs/dummy-query.txt", bloomFilter, "output.txt");
+//        CuckooFilter cuckooFilter = new CuckooFilter(set.size(), .05, .95, 2, 250);
+//
 //        set.stream().sorted().forEach(x -> {
 //            if (!cuckooFilter.insert(x)) {
 //                System.out.printf("too full to insert!");
 //            }
-////            System.out.printf("A:SLDKJ %s \n", cuckooFilter.fingerprint(x));
 //        });
-//        queryFile("Bloom-Filter/test-inputs/dummy-query.txt", cuckooFilter);
-
-//        cuckooFilter.insert("holospondaic");
-//        System.out.printf("%b \n", cuckooFilter.check("holospondaic"));
-//        for (String[] bucket : cuckooFilter.buckets) {
-//            for (String key: bucket) {
-//                if (key != null) {
-//                    System.out.printf("%s\n", key);
-//                } else {
-//                    System.out.printf("empty space");
-//                }
-//            }
-//        }
-
-//        System.out.printf("%d %d\n", cuckooFilter.buckets.length, cuckooFilter.buckets[0].length);
-//
-//        cuckooFilter.insert("Hello World");
-//        System.out.printf("%b\n", cuckooFilter.check("Hello World"));
-//        cuckooFilter.delete("Hello World");
-//        System.out.printf("%b\n", cuckooFilter.check("Meow"));
-//        System.out.printf("%b\n", cuckooFilter.check("Hello World"));
+//        queryFile("Bloom-Filter/test-inputs/dummy-query.txt", cuckooFilter, "output.txt");
     }
 
     public static HashSet<String> readFile(String file) throws IOException {
@@ -115,18 +103,26 @@ public class Runner {
 
     }
 
-    public static void queryFile(String file, CuckooFilter cuckooFilter) throws IOException {
+    public static void queryFile(String file, CuckooFilter cuckooFilter, String out) throws IOException {
         try (
                 Stream<String> stream = Files.lines(Paths.get(file))
         )
         {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(out));
+
             stream.forEach(key -> {
-                if (cuckooFilter.check(key)) {
-                    System.out.printf("%s\t PROB_YES\n", key);
-                } else {
-                    System.out.printf("%s\t NO\n", key);
+                try {
+                    if (cuckooFilter.check(key)) {
+                        writer.write(key + "\t" + "PROB_YES" + "\n");
+                    } else {
+                        writer.write(key + "\t" + "NO" + "\n");
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             });
+
+            writer.close();
         }
     }
 
@@ -174,6 +170,7 @@ public class Runner {
     }
 
 
+
     public static class CuckooFilter {
         private int m; // number of buckets
         private HashFunction hashFunc = Hashing.murmur3_32_fixed(200); // some random seed idk
@@ -185,12 +182,18 @@ public class Runner {
         public CuckooFilter(int setCount, double falsePosProb, double loadFactor, int entriesPerBucket, int maxKicks) { // what it will be once i get the math
 //        public CuckooFilter(int m, int entriesPerBucket, int maxKicks) {
 
-            this.m = (int) Math.ceil(setCount / (entriesPerBucket * loadFactor));
+            this.m = nextPowerOfTwo((int) Math.ceil(setCount / (entriesPerBucket * loadFactor)));
             buckets = new String [m][entriesPerBucket];
             this.maxKicks = maxKicks;
             this.entriesPerBucket = entriesPerBucket;
 
-            this.fingerprintSize = (int) Math.ceil((Math.log(2*entriesPerBucket) / Math.log(2)) / falsePosProb);
+            double log2InvEpsilon = Math.log(1.0 / falsePosProb) / Math.log(2);
+            double log2TwoB = Math.log(2 * entriesPerBucket) / Math.log(2);
+            this.fingerprintSize = (int) Math.ceil(log2InvEpsilon + log2TwoB);
+        }
+
+        private int nextPowerOfTwo(int n) {
+            return (n < 1) ? 1 : Integer.highestOneBit(n - 1) << 1;
         }
 
         int hash(String item) {
@@ -223,48 +226,48 @@ public class Runner {
             String f = fingerprint(item);
             int i1 = hash(item);
 
-            int i2 = (i1 ^ hash(f)) % m ; // xor i1 and hash(f)
-            if (i1 == 2531) {
-                System.out.printf("%s \n", item);
-            }
+            int i2 = (i1 ^ hash(f)) & (m-1); // xor i1 and hash(f)
+//            if (i1 == 2531) {
+////                System.out.printf("%s \n", item);
+//            }
 
             int toPut = hasSpace(buckets[i1]);
             if (toPut != -1) {
                 buckets[i1][toPut] = f; // insert f
-                System.out.println();
-                System.out.println(i2);
-                System.out.println(toPut);
+//                System.out.println();
+//                System.out.println(i2);
+//                System.out.println(toPut);
                 return true;
             }
             toPut = hasSpace(buckets[i2]);
             if (toPut != -1) {
                 buckets[i2][toPut] = f; // insert in second option
-                System.out.println(i2);
-                System.out.println(toPut);
+//                System.out.println(i2);
+//                System.out.println(toPut);
                 return true;
             }
 
             // neither bucket has room
             int i = Math.random() > 0.5? i1 : i2;
             for (int n = 0; n < maxKicks; n++) {
-                int j = (int) (Math.random() * (entriesPerBucket - 1)); // pick random bucket entry
+                int j = (int) (Math.random() * (entriesPerBucket)); // pick random bucket entry
 
                 String newF = buckets[i][j]; // take current entry
                 buckets[i][j] = f; // insert new entry where previous was
+                f = newF;
+//
+//                System.out.println(i);
+//                System.out.println(j);
 
-
-                System.out.println(i);
-                System.out.println(j);
-
-                i = (i ^ hash(newF)) % m;
+                i = (i ^ hash(f))& (m-1);
 
                 int space = hasSpace(buckets[i]);
                 if (space != -1) {
-                    buckets[i][space] = newF;
+                    buckets[i][space] = f;
 
-                    System.out.println(i);
-                    System.out.println(space);
-                    System.out.println(newF);
+//                    System.out.println(i);
+//                    System.out.println(space);
+//                    System.out.println(newF);
                     return true;
                 }
             }
@@ -275,12 +278,12 @@ public class Runner {
         boolean check(String item) {
             String f = fingerprint(item);
             int i1 = hash(item);
-            int i2 = (i1 ^ hash(f)) % m;
-            System.out.printf("bucket1 %d buket2 %d \n", i1, i2);
-            System.out.printf("%s \n", f);
+            int i2 = (i1 ^ hash(f)) & (m-1);
+//            System.out.printf("bucket1 %d buket2 %d \n", i1, i2);
+//            System.out.printf("%s \n", f);
 
             for (String x : buckets[i1]) {
-                System.out.println(x);
+//                System.out.println(x);
                 if (x != null && x.equals(f)) {
 
                     return true;
@@ -288,9 +291,9 @@ public class Runner {
             }
 
             for (String x : buckets[i2]) {
-                System.out.println(x);
+//                System.out.println(x);
                 if (x != null && x.equals(f)) {
-                    System.out.println(x);
+//                    System.out.println(x);
                     return true;
                 }
             }
@@ -301,7 +304,7 @@ public class Runner {
         boolean delete(String item) {
             String f = fingerprint(item);
             int i1 = hash(item);
-            int i2 = (i1 ^ hash(f)) % m;
+            int i2 = (i1 ^ hash(f)) & (m-1);
 
             for (int i = 0; i < entriesPerBucket; i++) {
                 if (buckets[i1][i] != null && buckets[i1][i].equals(f)) {
