@@ -19,18 +19,18 @@ public class Runner {
         HashSet<String> set = readFile(inputPath);
 
         // Bloom Filter Evaluation
-        BloomFilter bloomFilter = new BloomFilter(set.size(), Double.parseDouble(fpr));
+        CuckooFilter cuckooFilter = new CuckooFilter(set.size(), Double.parseDouble(fpr), 0.95, 4, 1000);
 
         System.out.printf("n %d\n", set.size());
 
         set.forEach(x -> {
-            bloomFilter.add(x);
+            cuckooFilter.insert(x);
         });
 
         long endBuild = System.nanoTime();
         long startQuery = System.nanoTime();
 
-        queryFile(queryPath, bloomFilter, outputPath);
+        queryFile(queryPath, cuckooFilter, outputPath);
         long endQuery = System.nanoTime();
 
         double buildTimeSec = (endBuild - startBuild) / 1_000_000_000.0;
