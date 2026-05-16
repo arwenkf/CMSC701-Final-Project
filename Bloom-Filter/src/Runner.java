@@ -8,8 +8,7 @@ import java.util.*;
 import java.util.stream.Stream;
 //import edu.princeton.cs.randomhash.*;
 import com.google.common.hash.*;
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+
 public class Runner {
     public static void main(String[] args) throws IOException {
 
@@ -19,9 +18,10 @@ public class Runner {
         HashSet<String> set = readFile(inputPath);
 
         // Bloom Filter Evaluation
-        CuckooFilter cuckooFilter = new CuckooFilter(set.size(), Double.parseDouble(fpr), 0.95, 4, 1000);
+        BloomFilter bloomFilter = new BloomFilter(set.size(), Double.parseDouble(fpr));
 
-        System.out.printf("n %d\n", set.size());
+        // Cuckoo Filter Evaluation
+        CuckooFilter cuckooFilter = new CuckooFilter(set.size(), Double.parseDouble(fpr), 0.95, 4, 1000);
 
         set.forEach(x -> {
             cuckooFilter.insert(x);
@@ -44,7 +44,6 @@ public class Runner {
         } catch (IOException e) {
             System.err.println("Error writing to bloom-eval.txt: " + e.getMessage());
         }
-
     }
 
     public static HashSet<String> readFile(String file) throws IOException {
