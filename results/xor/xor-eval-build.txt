@@ -1,0 +1,87 @@
+6945
+built time with fpr: 0.0001
+7.50243825
+built time with fpr: 0.0001
+7.41579275
+built time with fpr: 0.0001
+7.330756875
+built time with fpr: 0.001
+7.410583833
+built time with fpr: 0.001
+7.135226
+built time with fpr: 0.001
+7.272691792
+built time with fpr: 0.01
+7.250166291
+built time with fpr: 0.01
+7.5420475
+built time with fpr: 0.01
+7.415165916
+built time with fpr: 0.1
+7.481625583
+built time with fpr: 0.1
+7.247736458
+built time with fpr: 0.1
+7.456285
+built time with fpr: 0.25
+7.470886542
+built time with fpr: 0.25
+7.474473875
+built time with fpr: 0.25
+7.230411125
+built time with fpr: 0.5
+7.189803708
+built time with fpr: 0.5
+7.165511458
+built time with fpr: 0.5
+7.165912375
+built time with fpr: 0.75
+7.227566417
+built time with fpr: 0.75
+7.163487375
+built time with fpr: 0.75
+7.10358675
+
+data2
+built time with fpr: 0.0001
+0.096746708
+built time with fpr: 0.0001
+0.096868584
+built time with fpr: 0.0001
+0.0991805
+built time with fpr: 0.001
+0.096979083
+built time with fpr: 0.001
+0.098229541
+built time with fpr: 0.001
+0.09543
+built time with fpr: 0.01
+0.091830459
+built time with fpr: 0.01
+0.096813167
+built time with fpr: 0.01
+0.096058208
+built time with fpr: 0.1
+0.094805458
+built time with fpr: 0.1
+0.094800625
+built time with fpr: 0.1
+0.095569
+built time with fpr: 0.25
+0.096690375
+built time with fpr: 0.25
+0.095885125
+built time with fpr: 0.25
+0.227822708
+built time with fpr: 0.5
+0.10381875
+built time with fpr: 0.5
+0.104600166
+built time with fpr: 0.5
+0.106753
+built time with fpr: 0.75
+0.107328125
+built time with fpr: 0.75
+0.11903875
+built time with fpr: 0.75
+0.101816541

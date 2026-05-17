@@ -8,6 +8,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class buildXor {
 
@@ -35,7 +38,6 @@ public class buildXor {
         }
     }
 
-    // TODO: make it read from FASTA or FASTQ
     private static void readKeys(String path) {
         keys = new HashSet<>();
         try {
@@ -184,8 +186,22 @@ public class buildXor {
 
             c = (int) (keys.size() * 1.23) + 32;
 
+            long startBuild = System.nanoTime();
             constructXor(Double.parseDouble(fpr));
+            long endBuild = System.nanoTime();
+
             writeOut(out);
+
+            try (BufferedWriter buildWriter = new BufferedWriter(new FileWriter("xor-eval-build.txt", true))) {
+                buildWriter.write(path);
+                buildWriter.newLine();
+                buildWriter.write("fpr " + fpr.trim());
+                buildWriter.newLine();
+                buildWriter.write(String.valueOf((endBuild - startBuild) / 1_000_000_000.0));
+                buildWriter.newLine();
+            } catch (IOException e) {
+                System.err.println("Error writing to xor-eval.txt: " + e.getMessage());
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

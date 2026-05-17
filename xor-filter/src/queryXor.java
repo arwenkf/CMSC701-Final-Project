@@ -7,6 +7,9 @@ import org.apache.lucene.util.packed.PackedInts;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class queryXor {
 
@@ -14,6 +17,8 @@ public class queryXor {
     static HashFunction fingerprintFunc = Hashing.crc32();
     static int seed, size, k;
     static HashFunction h0, h1, h2;
+    static String fpr;
+    static long queryTime = 0;
 
     private static void parseBuild(String inputBuild) throws Exception {
         try {
@@ -54,21 +59,31 @@ public class queryXor {
     }
 
     private static void readAndWriteQueries(String queries, String out) {
+
         try {
+
             Scanner scanner = new Scanner(new File(queries));
             BufferedWriter writer = new BufferedWriter(new FileWriter(out));
+            long startQuery;
+            long endQuery;
+
 
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine().trim();
                 if (line.isEmpty()) {
                     continue;
                 }
+                startQuery = System.nanoTime();
                 String res = computeQuery(line)? "PROB_YES" : "NO";
+                endQuery = System.nanoTime();
+                queryTime += ((endQuery - startQuery));
 
                 writer.write(line + "\t" + res + "\n");
             }
             writer.close();
             scanner.close();
+
+
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -78,9 +93,21 @@ public class queryXor {
     public static void main (String[] args) {
         try {
             String inputBuild = args[0], query = args[1], out = args[2];
+            fpr = args[3];
 
             parseBuild(inputBuild);
             readAndWriteQueries(query, out);
+
+            try (BufferedWriter queryWriter = new BufferedWriter(new FileWriter("xor-eval-query.txt", true))) {
+                queryWriter.write(query);
+                queryWriter.newLine();
+                queryWriter.write("fpr " + fpr.trim());
+                queryWriter.newLine();
+                queryWriter.write(String.valueOf(queryTime / 1_000_000_000.0));
+                queryWriter.newLine();
+            } catch (IOException e) {
+                System.err.println("Error writing to xor-eval-query.txt: " + e.getMessage());
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
