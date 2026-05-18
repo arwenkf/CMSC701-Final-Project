@@ -1,7 +1,6 @@
 #!/bin/bash
 
 GT_6945="$PWD/data/GCA_000006945.2/truth-GCA_000006945.txt"
-
 GT_DATA2="$PWD/data/data_2/truth.txt"
 
 if [ ! -f "$GT_6945" ]; then
@@ -14,9 +13,19 @@ if [ ! -f "$GT_DATA2" ]; then
     exit 1
 fi
 
-cd "$PWD/Bloom-Filter" || exit
+if [[ "$1" == "Bloom" ]]; then
+    FILTER="Bloom-Filter"
+elif [[ "$1" == "Cuckoo" ]]; then
+    FILTER="Bloom-Filter"
+elif [[ "$1" == "Xor" ]]; then
+    FILTER="xor-filter"
+elif [[ "$1" == "Baseline" ]]; then
+    FILTER="baseline-hash"
+fi
 
-RES_FILE="bloom-fpr-true-positives.txt"
+cd "$PWD/$FILTER" || exit
+
+RES_FILE="res.txt"
 > "$RES_FILE"
 
 echo "Processing files..."
@@ -63,7 +72,7 @@ for file in res-*.txt; do
 done
 
 
-SUMMARY_FILE="bloom-fpr-opt-res.txt"
+SUMMARY_FILE="../$1-fpr-summary-$2.txt"
 
 echo "" > "$SUMMARY_FILE"
 printf "%-12s | %-12s | %-10s | %-15s\n" "Dataset" "Target FPR" "# of Runs" "Avg Actual FPR" >> "$SUMMARY_FILE"

@@ -12,26 +12,37 @@ import com.google.common.hash.*;
 public class Runner {
     public static void main(String[] args) throws IOException {
 
-        String inputPath = args[0], fpr = args[1], queryPath = args[2], outputPath = args[3];
+        String inputPath = args[0], fpr = args[1], queryPath = args[2], outputPath = args[3], filterMode = args[4];
 
-        long startBuild = System.nanoTime();
         HashSet<String> set = readFile(inputPath);
 
-        // Bloom Filter Evaluation
-        BloomFilter bloomFilter = new BloomFilter(set.size(), Double.parseDouble(fpr));
+        long startBuild = 0, endBuild = 0, startQuery = 0, endQuery = 0;
 
-        // Cuckoo Filter Evaluation
-        CuckooFilter cuckooFilter = new CuckooFilter(set.size(), Double.parseDouble(fpr), 0.95, 4, 1000);
+        if(filterMode.equals("Bloom")){
+            startBuild = System.nanoTime();
+            BloomFilter filter = new BloomFilter(set.size(), Double.parseDouble(fpr));
+            
+            set.forEach(x -> {
+                        filter.add(x);
+                    });
+            endBuild = System.nanoTime();
 
-        set.forEach(x -> {
-            cuckooFilter.insert(x);
-        });
+            startQuery = System.nanoTime();
+            queryFile(queryPath, filter, outputPath);
+            endQuery = System.nanoTime();
+            
+        } else if(filterMode.equals("Cuckoo")){
+            startBuild = System.nanoTime();
+            CuckooFilter filter = new CuckooFilter(set.size(), Double.parseDouble(fpr), 0.95, 4, 1000);
+            set.forEach(x -> {
+                        filter.insert(x);
+                    });
+            endBuild = System.nanoTime();
 
-        long endBuild = System.nanoTime();
-        long startQuery = System.nanoTime();
-
-        queryFile(queryPath, cuckooFilter, outputPath);
-        long endQuery = System.nanoTime();
+            startQuery = System.nanoTime();
+            queryFile(queryPath, filter, outputPath);
+            endQuery = System.nanoTime();
+        }
 
         double buildTimeSec = (endBuild - startBuild) / 1_000_000_000.0;
         double queryTimeSec = (endQuery - startQuery) / 1_000_000_000.0;
