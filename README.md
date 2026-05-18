@@ -7,8 +7,8 @@ TODO:
 - make space table for large dataset (arwen)
 - ~~methods (ceren)~~
 - abstract/intro/background bloom/cuckoo (arwen)
-  - xor (ceren)
-- eval (ceren)
+  - ~~xor (ceren)~~
+- ~~eval (ceren)~~
   - space table (arwen)
   - explanation for cuckoo weirdness (arwen)
 - conclusion/limitation (arwen)
